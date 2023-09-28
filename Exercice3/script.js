@@ -1,82 +1,14 @@
 /*
-    Objectif de l'exercice : les mêmes que dans TP4/Exercice1 ! A savoir :
+    Objectif de l'exercice :
     
-    . Principes de base d'une application structurée MVC
-    . Comprendre et respecter les rôles respectifs du Modèle, de la Vue et du Contrôleur
-    . Savoir faire du templating dans une organisation MVC : le Contrôleur formate un template (Vue) avec des données (Modèle) :
-
-       data (M)  ----get---
-                           |
-                        Contrôleur (C) --------> page web
-                           |
-       template (V) --get--
-
-    . Savoir gérer des événements dans une application MVC : 
-        - la Vue définie les événements à surveiller 
-        - les gestionnaires d'événements attachés sont (en général) des méthodes du Contrôleur (c'est dans C qu'on dit quoi faire)
-        - un gestionnaire d'événement du Contrôleur, selon l'action, pourra mettre à jour ou interroger (obtenir d'autres données)
-          le Modèle et provoquer le rafraichissement de la Vue pour que l'affichage présentée à l'utilisateur reste cohérent avec 
-          les données (Modèle) de l'application.
-
-    En répondant correctement aux questions de cet exercice, vous devez obtenir un rendu analogue
-    au visuel objectif.mp4 disponible dans le répertoire asset.
-
-     Comme d'habitude, interdiction d'éditez directement les fichiers index.html et style.css 
-
-*/
-
-
-/*  Q0 (question qui n'en est pas vraiment une)
-
-     Cet exercice est en tout point analogie à TP4/Exercice1. Relisez-le au besoin.
-*/
-
-
-/*  Q1
+   
+    voir asset/objectif.mp4
     
-    L'application démarre avec l'appel C.init() dont le rôle est d'initialiser l'application.
-    Dans la déclaration de C.init, on trouve l'instruction : V.renderMenu(M.recipes);
-    Celle-ci doit permettre d'afficher la liste de tous les personnages sur la page.
-    Mais le code de la méthode V.renderMenu a été effacé.
-
-    Commencer par écrire le code de la méthode V.formatOneItem qui vous sera utile ensuite
-    pour écrire le code de la méthode V.renderMenu.
-
-    Si vous y parvenez, la liste de tous les recettes stockés dans le Modèle doit apparaître dans la barre de menu gauche sur la page.
-*/
-
-
-/*  Q2
-
-    L'interface propose de filtrer les recettes en fonction de leur place (entrée, plat, dessert ou tous).
-    Mais ce filtre n'est pas fonctionnel, le code a été en partie effacé.
-
-    Tout d'abord, complétez le code de la méthode V.init en respectant les indications.
-    Puis, faites de même avec le code de la méthode C.handler_clickOnFilter.
-
-    Si cela fonctionne, le système de filtre doit redevenir fonctionnel.
-
+    Note : La méthode V.renderRecipe permet l'affichage d'une recette. Pas besoin de le faire.
 */
 
 
 
-/* Objet M, le Modèle de l'application
-
-   On stocke et organise dans cet objet toutes les données utilisées par l'application. *plus* les méthodes (fonctions)
-   nécessaires à la manipulation de ces données, toujours en fonction des besoins de l'application.
-
-   Dans le cas présent, les données sont un tableau de recettes que vous avez déjà utilisées dans les précédents TP.
-   Vous remarquerez toutefois deux informations supplémentaires dans chaque recette : un identifiant et une propriété type
-   qui correspond à un tableau contenant 'entrée' et/ou 'plat' et/ou 'dessert' pour indiquer en quelle "position" peut se manger la recette.
-   C'est important car pour notre application, on va vouloir filtrer les recettes en fonction de ce type (entrée, plat ou dessert).
-   On vous donne la méthode M.filterRecipes qui permet de filtrer les recettes selon un type donné.
-
-   REGLE COSMIQUE ABSOLUE : 
-   M (le Modèle) ne doit pas interagir directement avec V (la Vue).
-   Donc si vous vous surprenez à écrire 'V.trucBidule...' alors que vous vous trouvez dans l'objet M, vous êtes le maillon faible.
-   En revanche M peut interagir avec C.
-
-*/
 let M = {};
 
 /* Objet recipes : 
@@ -308,36 +240,13 @@ M.recipes = [
 
 ]; // end of recipes
 
-/*  M.filterRecipes
-    . paramètre place : une chaîne valant 'entrée', 'plat' ou 'dessert'
-    . valeur de retour : un tableau des recettes  du type donné en paramètre
-*/
-M.filterRecipes = function( place ){
-    if (place=='all'){
+
+M.filterRecipes = function( type ){
+    if (type=='all'){
         return M.recipes;
     }
     else{
-        /* si vous voulez comprendre le code ci-après, documentez-vous : 
-        https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
-        https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/find
-        on filtre le tableau M.recipes avec pour critère : place doit être présent dans le tableau type de chaque recette
-        */
-        return M.recipes.filter( r => r.type.find( t => t==place ) !=undefined );
-
-        /* alternativement, le code commenté ci-après fait la même chose mais sans utiliser les méthodes filter et find des tableaux en JS */
-        /*
-        let res = []; // on part d'un tableau vide
-        for (let i=0; i<M.recipes.length; i++){ // on parcourt le tableau de recettes
-            let r = M.recipes[i];
-            for(let j=0; j<r.type.length; j++){ // on parcourt le tableau type de chaque recette
-                if (r.type[j]==place){ // si on y trouve place
-                    res.push(r); // on ajoute la recette au tableau résultat
-                }
-            }
-        }
-        return res; // et on termine en retournant le tableau des recettes trouvées
-        */
-    
+        return M.recipes.filter( r => r.type.find( t => t==type ) !=undefined );
     }
 }
 
@@ -345,97 +254,80 @@ M.filterRecipes = function( place ){
 /* Objet View
    La vue (View) désigne l'interface web. Elle contient toutes les fonctions qui permettent de 
    modifier/formater (et plus tard interagir) avec la page web (tout ou partie).
-  
-   REGLE COSMIQUE ABSOLUE :
-   V (la Vue) ne doit pas interagir directement avec M (le Modèle).
-   Donc si vous vous surprenez à écrire 'M.trucBidule...' alors que vous vous trouvez dans l'objet V, vous êtes le maillon faible.
-   En revanche V peut interagir avec C.
+   Et oui, contrairement au précédent exercice, elle vous est donnnée vide. Mais c'est parce
+   qu'il y a moins de chose à mettre dedans !
 */
 let V = {}; 
 
-/*  V.formatOneItemMenu
-    . paramètre id : l'identifiant d'une recette
-    . paramètre name : le nom d'une recette
-    > valeur de retour : une chaine, copie du template HTML #item_menu_template formaté avec id et name
-
-    Note : Cette fonction est quasi identique à celle de TP4/Exercice1. Attention quand même, il y a 2 informations
-    à formater.
-*/
-V.formatOneItemMenu = function( id, name ){
-   // Ajouter vos instructions ici
+V.formatOneIngredient = function(name, quantity){
+    let template = document.querySelector('#ingredient_template');
+    let li = template.innerHTML;
+    li = li.replace('{{nom}}', name);
+    li = li.replace('{{combien}}', quantity);
+    return li;
 }
 
-/*  V.renderMenu
-    . paramètre data : un tableau de recettes
-    > valeur de retour : aucune
+V.formatOneRecipe = function(r){
+    let template = document.querySelector('#recipe_template');
+    let html = template.innerHTML;
+    html = html.replace('{{url}}', r.info.photo);
+    html = html.replace('{{titre}}', r.info.name);
+    html = html.replace('{{temps}}', r.info.time.cooking+r.info.time.preparation);
+    html = html.replace('{{niveau}}', r.info.difficulty);
+    html = html.replace('{{cout}}', r.info.cost);
+    html = html.replace('{{texte}}', r.info.description);
 
-    La fonction formate pour chaque personnage un élément de liste décrit par le template #item_menu_template (à l'aide de V.formatOneItem).
-    L'ensemble des éléments de liste est ensuite placée dans l'élément <ul> de la barre de navigation.
-
-    Note : Là encore c'est 100% analogue à TP4/Exercice1. Savoir formater une liste, c'est savoir formater n'importe quelle liste !
-*/
-V.renderMenu = function( data ){
-   // ajoutez vos instructions ici (bien repérer le sélecteur CSS qui vous permettra de sélectionner l'élément ul)
-}
-
-/*  V.init
+    let lis = '';
+    for(let i=0; i<r.ingredients.length; i++){
+        lis += this.formatOneIngredient(r.ingredients[i].name, r.ingredients[i].quantity);
+    }
+   
+    html = html.replace('{{liste}}', lis);
     
-    Comme son nom l'indique, V.init est une fonction dans laquelle on prendra l'habitude de placer toutes les
-    instructions qu'il faut exécuter au lancement de l'application pour que l'interface (la vue donc) soit 
-    fonctionnelle.
-
-    On y indiquera entre autres les événéments à surveiller.
-*/
-V.init = function(){
-    // Ajoutez vos instructions ici (on surveillera les click au niveau de la div de class 'filters')
+    return html;
 }
 
+V.renderRecipe = function( data ){
+    let htmlRecipe = V.formatOneRecipe(data);
+    document.querySelector('.content').innerHTML = htmlRecipe;
+}
 
-/* L'objet C, le Contrôleur.
+V.formatOneItemMenu = function( id, name ){
+    let template = document.querySelector('#item_menu_template');
+    let li = template.innerHTML;
+    li = li.replace('{{id}}', id);
+    li = li.replace('{{nom}}', name);
+    return li;
+}
 
-    M <--> C <--> V
+V.renderMenu = function( data ){
+    let allHtmlItem = "";
+    for(let i=0; i<data.length; i++){
+        allHtmlItem += V.formatOneItemMenu(data[i].id, data[i].info.name);
+    }
+    document.querySelector(".sidenav ul").innerHTML = allHtmlItem;
+}
 
-    Schématiquement parlant, le rôle du Contrôleur est d'assurer la séparation du Modèle et de la Vue
-    tout en réalisant le lien entre les deux. Cela peut sembler contradictoire, mais pas du tout ! En
-    bref, on dit juste que M et V ne doivent pas avoir d'interactions directes, s'ils veulent "échanger"
-    ils devront passer par l'intermédiaire de C. Cette façon d'organiser son code est devenue très commune
-    car elle présente de nombreux avantages : 
-    - elle sépare bien le fond (M) de la forme (V) et permet l'évolution indépendante de l'un et l'autre (modifier l'un ne vous obligera pas à refaire l'autre)
-    - la 'logique' de l'application se retrouve naturellement dans le C
-    - le tout aide énormément à faire "grandir" une application sans risquer de "tout casser"
+V.init = function(){
+    let filtres = document.querySelector('.filters');
+    filtres.addEventListener('click', C.handler_clickOnFilter);
+}
 
-    Note, C étant à l'interface de M et V, vous avez le droit de faire référence à M comme à V lorsque vous
-    vous trouvez dans cet objet. Là, c'est ok.
-
-*/
 
 let C = {};
 
-/*  C.init
-
-    Cette fonction correspond au lancement, à l'intialisation de l'application. On prendra donc l'habitude
-    d'y mettre tout ce qui doit être fait pour que l'application soit fonctionnelle avant que l'utilisateur
-    n'interagisse avec. 
-    En particulier, on y appelera les initialisations de la Vue et du Modèle (quand il y en a !)
-    
-    Dans le cas présent, seule la Vue a besoin d'être initialisée, d'où l'appel à V.init().
-    Ensuite on effectue un premier affichage de toutes les recette, d'où l'appel à V.renderMenu(M.recipes)
-*/
 C.init = function(){
     V.init();
     V.renderMenu(M.recipes);
 }
 
-/*  C.handler_clickOnFilter
-    . paramètre ev : un objet Event créé par le navigateur suite à un 'click' de l'utilisateur
-    
-    Cette fonction est une fonction gestionnaire d'événements (voir V.init pour l'enregistrement avec addEvenntListener).
-    On y place les instructions que doit exécuter le navigateur lorsque l'utilisateur clique sur l'un des
-    filtres de l'interface.
-*/
+
 C.handler_clickOnFilter = function(ev){
-    // Ajoutez vos instructions ici (pensez à vérifiez que les 'click' on bien pour cible un élément <i> ou avec une propriété data-filter)
+    if ( ev.target.dataset.filter != undefined )
+    {
+        let value = ev.target.dataset.filter;
+        V.renderMenu( M.filterRecipes(value) );
+    }
 }
 
-// Initialisation de l'application. Tout découle de cet appel.
 C.init();

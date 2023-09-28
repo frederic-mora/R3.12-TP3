@@ -1,15 +1,15 @@
 /*
-    Objectif de l'exercice :
+    Objectif de l'exercice : les mêmes que dans TP4/Exercice1 ! A savoir :
     
     . Principes de base d'une application structurée MVC
     . Comprendre et respecter les rôles respectifs du Modèle, de la Vue et du Contrôleur
     . Savoir faire du templating dans une organisation MVC : le Contrôleur formate un template (Vue) avec des données (Modèle) :
 
-       data (M)  ────get───┐
-                           │
-                        Contrôleur (C) ────────> page web
-                           │
-       template (V) ──get──┘
+       data (M)  ----get---
+                           |
+                        Contrôleur (C) --------> page web
+                           |
+       template (V) --get--
 
     . Savoir gérer des événements dans une application MVC : 
         - la Vue définie les événements à surveiller 
@@ -21,43 +21,34 @@
     En répondant correctement aux questions de cet exercice, vous devez obtenir un rendu analogue
     au visuel objectif.mp4 disponible dans le répertoire asset.
 
-    Comme d'habitude, interdiction d'éditez directement les fichiers index.html et style.css 
-
-
-    ATTENTION : 
-    Rappelez-vous que le code ne s'exécute pas séquentiellement de la première à la dernière ligne !
-    D'ailleurs ici, la première instruction qui s'exécute se trouve à la toute fin du fichier ! Pour comprendre ce qui se passe, 
-    il faut regarder le code en suivant l'ordre des appels de fonctions/méthodes et pas l'ordre de leur déclaration !
+     Comme d'habitude, interdiction d'éditez directement les fichiers index.html et style.css 
 
 */
 
+
 /*  Q0 (question qui n'en est pas vraiment une)
 
-    Avant toute chose, prenez le temps de regarder le code (à trou) de ce fichier, les objets M puis V puis C et leur description donnée
-    en commentaire. Essayez ensuite de "suivre" l'ordre dans lequel ce code s'exécute en partant de l'initialisation C.init() tout en bas.
+     Cet exercice est en tout point analogie à TP4/Exercice1. Relisez-le au besoin.
 */
 
 
 /*  Q1
     
     L'application démarre avec l'appel C.init() dont le rôle est d'initialiser l'application.
-    Dans la déclaration de C.init, on trouve l'instruction : V.renderCharacters(M.characters);
+    Dans la déclaration de C.init, on trouve l'instruction : V.renderMenu(M.recipes);
     Celle-ci doit permettre d'afficher la liste de tous les personnages sur la page.
-    Mais le code de la méthode V.renderCharacters a été effacé.
+    Mais le code de la méthode V.renderMenu a été effacé.
 
     Commencer par écrire le code de la méthode V.formatOneItem qui vous sera utile ensuite
-    pour écrire le code de la méthode V.renderCharacters.
+    pour écrire le code de la méthode V.renderMenu.
 
-    Si vous y parvenez, la liste de tous les personnages stockés dans le Modèle doit apparaître sur la page.
-
-    Vous avez déjà fait cette question. C'est la même chose que lorsque vous formatiez les ingrédients d'une recette
-    dans un précédent TP. Sauf que là, il s'agit des noms de personnages et pas d'ingrédients. Mais une liste reste une liste.
+    Si vous y parvenez, la liste de tous les recettes stockés dans le Modèle doit apparaître dans la barre de menu gauche sur la page.
 */
 
 
 /*  Q2
 
-    L'interface propose de filtrer les personnages en fonction de leur appartenance au côté lumineux ou obscure de la force.
+    L'interface propose de filtrer les recettes en fonction de leur place (entrée, plat, dessert ou tous).
     Mais ce filtre n'est pas fonctionnel, le code a été en partie effacé.
 
     Tout d'abord, complétez le code de la méthode V.init en respectant les indications.
@@ -68,15 +59,17 @@
 */
 
 
+
 /* Objet M, le Modèle de l'application
 
    On stocke et organise dans cet objet toutes les données utilisées par l'application. *plus* les méthodes (fonctions)
    nécessaires à la manipulation de ces données, toujours en fonction des besoins de l'application.
 
-   Dans le cas présent, les données sont une liste de personnages de l'univers Star Wars. Elles sont organisées dans un 
-   tableau (M.characters) d'objets, chacun contenant le nom du personnage et le côté de la force auquel il appartient.
-   Pour notre application, on veut pouvoir filtrer les personnages en fonction de leur appartenance au côté obscure ou 
-   lumineux de la force. La méthode M.filterCharacters répond à ce besoin. 
+   Dans le cas présent, les données sont un tableau de recettes que vous avez déjà utilisées dans les précédents TP.
+   Vous remarquerez toutefois deux informations supplémentaires dans chaque recette : un identifiant et une propriété type
+   qui correspond à un tableau contenant 'entrée' et/ou 'plat' et/ou 'dessert' pour indiquer en quelle "position" peut se manger la recette.
+   C'est important car pour notre application, on va vouloir filtrer les recettes en fonction de ce type (entrée, plat ou dessert).
+   On vous donne la méthode M.filterRecipes qui permet de filtrer les recettes selon un type donné.
 
    REGLE COSMIQUE ABSOLUE : 
    M (le Modèle) ne doit pas interagir directement avec V (la Vue).
@@ -84,46 +77,267 @@
    En revanche M peut interagir avec C.
 
 */
-
 let M = {};
 
-// Ajout au Modèle du tableau de personnage M.characters 
-M.characters = [
-    { nom: 'Luke Skywalker',  side: 'light'},
-    { nom: 'Dark Vador', side: 'dark'},
-    { nom: 'Count Dooku', side: 'dark'},
-    { nom: 'Obi-Wan Kenobi', side: 'light'},
-    { nom: 'Leia Organa', side: 'light'},
-    { nom: 'Han Solo', side: 'light'},
-    { nom: 'Kylo Ren', side: 'dark'},
-    { nom: 'Darth Sidious', side: 'dark'},
-    { nom: 'Rey', side: 'light'},
-    { nom: 'Darth Maul', side: 'dark'}
-];
-
-/*  M.filterCharacters
-    Ajout au Modèle de la méthode M.filterCharacters :
-    . paramètre byside : une chaîne égale à 'light', 'dark', ou 'any' selon si l'on veut les personnages du côté clair, obscure ou tous.
-    > valeur de retour : un tableau d'objets, chaque objet correspondant à un personnage avec une propriété nom et une propriété side.
-
+/* Objet recipes : 
+   Il contient les données de l'application (ce qu'on appelle aussi : le modèle de l'application)
+   'recipes' est un tableau d'objets.
+   Chaque objet possède une structure identique et décrit une recette.
 */
-M.filterCharacters = function( byside ){
-    if ( byside=='any' ){
-        return M.characters;
+
+M.recipes = [
+    // un objet décrivant une recette
+    {
+        id: 'r23',
+        type: ['dessert'],
+        info: {
+            name: "Cookies maison",
+            photo: './asset/cookies.jpg',
+            time: {
+                preparation: 15,
+                cooking: 10
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Réalisez de délicieux cookies en un clin d'oeil !"
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'sel', quantity:'1cac'},
+            {name:'chocolat noir', quantity:'100g'},
+            {name:'farine', quantity:'150g'},
+            {name:'sucre vanillé', quantity:'1 sachet'},
+            {name:'beurre', quantity:'85g'},
+            {name:'oeuf', quantity:'1'},
+            {name:'sucre', quantity:'85g'},
+            {name:'levure chimique', quantity:'1cac'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r09',
+        type: ['entree', 'plat'],
+        info: {
+            name: "Les falafels",
+            photo: './asset/falafel.jpg',
+            time: {
+                preparation: 10,
+                cooking: 10
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Les falafels ou tamiya sont une spécialité culinaire levantine très répandue au Proche-Orient constituée de boulettes de pois chiches ou de fèves, mélangés à diverses épices, et frites dans l’huile."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'poids chiches', quantity:'500g'},
+            {name:"gousses d'ail", quantity:'3-4'},
+            {name:'oignon', quantity:'1 demi'},
+            {name:'bicarbonate', quantity:'1cac'},
+            {name:'cumin', quantity:'2cac'},
+            {name:'coriandre', quantity:'1 bouquet'},
+            {name:'menthe', quantity:'1 bouquet'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r65',
+        type: ['entree', 'plat'],
+        info: {
+            name: "Saint Jacques sautées",
+            photo: './asset/saint-jacques.jpg',
+            time: {
+                preparation: 5,
+                cooking: 10
+            },
+            cost: 'Moyen',
+            difficulty: 'Facile',
+            description: "Simple, rapide et efficace. Et délcieux en plus ! Les saint jacques et leur parfum inégalable se suffisent à elles-mêmes."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'saint-jacques', quantity:'8 noix'},
+            {name:'ciboulette', quantity:'1 demi bouquet'},
+            {name:'beurre', quantity:'50g'},
+            {name:'sel', quantity:'1 pincée'},
+            {name:'poivre', quantity:'1 pincée'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r11',
+        type: ['plat'],
+        info: {
+            name: "Tian de légumes",
+            photo: './asset/tian.jpg',
+            time: {
+                preparation: 15,
+                cooking: 120
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Le Tian est à la fois un plat en terre cuite vernissée et la préparation culinaire que l’on cuit longuement au four. C'est un plat parfait pour accompagner des grillades au cours d'un dîner estival."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'courgettes', quantity:'2'},
+            {name:'aubergines', quantity:'1'},
+            {name:'tomates', quantity:'2'},
+            {name:'oignon', quantity:'1'},
+            {name:"huile d'olive", quantity:'15 cl'},
+            {name:'herbes de provence', quantity:'25g'},
+            {name:'sel et poivre', quantity:'1 pincée'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r21',
+        type: ['entree'],
+        info: {
+            name: "Taboulé Libanais",
+            photo: './asset/taboule.jpg',
+            time: {
+                preparation: 40,
+                cooking: 0
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Simple salade de boulghour assaisonnée au citron et à l’huile d’olive et agrémentée de quelques herbes."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'persil plat', quantity:'1 botte'},
+            {name:'menthe', quantity:'3 brins'},
+            {name:'boulgour', quantity:'1 poignée'},
+            {name:'oignons', quantity:'1 botte'},
+            {name:'tomates', quantity:'4'},
+            {name:'citron', quantity:'1'},
+            {name:"huile d'olive", quantity:'15cl'},
+            {name:'sel', quantity:'1 pincée'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r5',
+        type: ['plat'],
+        info: {
+            name: "Côte de boeuf",
+            photo: './asset/cote-de-boeuf.jpg',
+            time: {
+                preparation: 10,
+                cooking: 20
+            },
+            cost: 'Assez cher',
+            difficulty: 'Facile',
+            description: "Simple et savoureuse, la cuisson d'une belle côte de boeuf est primordiale. Saisie à la poêle, vous finirez ensuite la cuisson au four pour un résultat optimal."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'côte de boeuf', quantity:'1'},
+            {name:'huile', quantity:'1 bon trait'},
+            {name:'sel', quantity:'1 pincée'},
+            {name:'poivre', quantity:'1 pincée'},
+            {name:'thym', quantity:'5 brins'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r19',
+        type: ['dessert'],
+        info: {
+            name: "Tarte au citron",
+            photo: './asset/tarte-au-citron.jpg',
+            time: {
+                preparation: 20,
+                cooking: 30
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Ce grand classique de la patisserie est incontournable. Sauf si vous n'aimez pas le citron."
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'citrons', quantity:'4'},
+            {name:'oeufs', quantity:'3+2'},
+            {name:'sucre semoule', quantity:'150g+70g'},
+            {name:'farine', quantity:'250g'},
+            {name:'beurre', quantity:'125g'},
+            {name:'eau', quantity:'5cl'},
+            {name:'sel', quantity:'1 pincée'}
+        ]
+    },
+    // un objet décrivant une recette
+    {
+        id: 'r87',
+        type: ['plat'],
+        info: {
+            name: "Purée Robuchon",
+            photo: './asset/puree-robuchon.jpg',
+            time: {
+                preparation: 15,
+                cooking: 25
+            },
+            cost: 'Bon marché',
+            difficulty: 'Facile',
+            description: "Avec du beurre, tout est meilleur ! Le secret ? 25% du poids des pommes de terre en beurre. Gras ? Pas autant que ça en a l'air, et moins que des frites !"
+        },
+
+        // ingredients est un tableau d'objets, chaque objet contient le nom 
+        // et la quantité d'un ingrédient de la recette
+        ingredients : [
+            {name:'pommes de terre BF-15', quantity:'1kg'},
+            {name:'beurre', quantity:'250g'},
+            {name:'sel', quantity:'10g'},
+            {name:'lait', quantity:'20cl'}
+        ]
+    }
+
+]; // end of recipes
+
+/*  M.filterRecipes
+    . paramètre place : une chaîne valant 'entrée', 'plat' ou 'dessert'
+    . valeur de retour : un tableau des recettes  du type donné en paramètre
+*/
+M.filterRecipes = function( place ){
+    if (place=='all'){
+        return M.recipes;
     }
     else{
-        // pour comprendre l'instruction ci-dessous : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
-        return M.characters.filter( perso => perso.side==byside );
-        /* A défaut, le code commenté ci-après fait la même chose mais sans utiliser la méthode filter des tableaux Javascript :
-        let res = [];
-        for(let i=0; i<M.characters.length; i++){
-            let perso = M.characters[i];
-            if (perso.side==byside){
-                res.push(perso);
+        /* si vous voulez comprendre le code ci-après, documentez-vous : 
+        https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+        https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+        on filtre le tableau M.recipes avec pour critère : place doit être présent dans le tableau type de chaque recette
+        */
+        return M.recipes.filter( r => r.type.find( t => t==place ) !=undefined );
+
+        /* alternativement, le code commenté ci-après fait la même chose mais sans utiliser les méthodes filter et find des tableaux en JS */
+        /*
+        let res = []; // on part d'un tableau vide
+        for (let i=0; i<M.recipes.length; i++){ // on parcourt le tableau de recettes
+            let r = M.recipes[i];
+            for(let j=0; j<r.type.length; j++){ // on parcourt le tableau type de chaque recette
+                if (r.type[j]==place){ // si on y trouve place
+                    res.push(r); // on ajoute la recette au tableau résultat
+                }
             }
         }
-        return res;
+        return res; // et on termine en retournant le tableau des recettes trouvées
         */
+    
     }
 }
 
@@ -131,42 +345,37 @@ M.filterCharacters = function( byside ){
 /* Objet View
    La vue (View) désigne l'interface web. Elle contient toutes les fonctions qui permettent de 
    modifier/formater (et plus tard interagir) avec la page web (tout ou partie).
-   Et oui, contrairement au précédent exercice, elle vous est donnnée vide. Mais c'est parce
-   qu'il y a moins de chose à mettre dedans !
-
+  
    REGLE COSMIQUE ABSOLUE :
    V (la Vue) ne doit pas interagir directement avec M (le Modèle).
    Donc si vous vous surprenez à écrire 'M.trucBidule...' alors que vous vous trouvez dans l'objet V, vous êtes le maillon faible.
    En revanche V peut interagir avec C.
-
 */
 let V = {}; 
 
 /*  V.formatOneItemMenu
-    . paramètre name : le nom d'un personnage de Star Wars
-    > valeur de retour : une chaine, copie du template HTML #item_menu_template formaté avec name
+    . paramètre id : l'identifiant d'une recette
+    . paramètre name : le nom d'une recette
+    > valeur de retour : une chaine, copie du template HTML #item_menu_template formaté avec id et name
 
-    Note : le template #item_menu_template correspond à une élément de liste <li>. C'est 100%
-    analogue à ce que vous avez déjà fait avec la liste des ingrédients d'une recette dans un 
-    précédent TP.
+    Note : Cette fonction est quasi identique à celle de TP4/Exercice1. Attention quand même, il y a 2 informations
+    à formater.
 */
-V.formatOneItem = function( name ){
-    // Ajouter vos instructions ici (voir la question 1)
+V.formatOneItemMenu = function( id, name ){
+   // Ajouter vos instructions ici
 }
 
-/*  V.renderCharacters
-    . paramètre data : un tableau d'objets de personnages Star Wars
+/*  V.renderMenu
+    . paramètre data : un tableau de recettes
     > valeur de retour : aucune
 
-    La fonction formate pour chaque personnage un élément de liste décrit par le template #item_menu_template.
+    La fonction formate pour chaque personnage un élément de liste décrit par le template #item_menu_template (à l'aide de V.formatOneItem).
     L'ensemble des éléments de liste est ensuite placée dans l'élément <ul> de la barre de navigation.
 
-    Note : Là encore c'est 100% analogue à ce qui a été déjà fait sur les ingrédients d'une recette. On 
-    reste sur le rendu dynamique d'une liste, une liste d'ingrédients, de personnages ou autres... La logique
-    reste la même.
+    Note : Là encore c'est 100% analogue à TP4/Exercice1. Savoir formater une liste, c'est savoir formater n'importe quelle liste !
 */
-V.renderCharacters = function( data ){
-   // Ajouter vos instructions ici (voir la question 1)
+V.renderMenu = function( data ){
+   // ajoutez vos instructions ici (bien repérer le sélecteur CSS qui vous permettra de sélectionner l'élément ul)
 }
 
 /*  V.init
@@ -178,12 +387,7 @@ V.renderCharacters = function( data ){
     On y indiquera entre autres les événéments à surveiller.
 */
 V.init = function(){
-    // ajoutez vos instructions ici (voir la question 2)
-
-    /*  Indications 
-        Ici, il faut ordonner au navigateur de surveiller les événements de type 'click' au niveau de la div HTML de classe "filters".
-        Si ça se produit, le navigateur devra appeler la méthode C.handler_clickOnFilter.
-    */
+    // Ajoutez vos instructions ici (on surveillera les click au niveau de la div de class 'filters')
 }
 
 
@@ -215,11 +419,11 @@ let C = {};
     En particulier, on y appelera les initialisations de la Vue et du Modèle (quand il y en a !)
     
     Dans le cas présent, seule la Vue a besoin d'être initialisée, d'où l'appel à V.init().
-    Ensuite on effectue un premier affichage de tous les personnages, d'où l'appel à V.renderCharacters(M.characters)
+    Ensuite on effectue un premier affichage de toutes les recette, d'où l'appel à V.renderMenu(M.recipes)
 */
 C.init = function(){
     V.init();
-    V.renderCharacters(M.characters);
+    V.renderMenu(M.recipes);
 }
 
 /*  C.handler_clickOnFilter
@@ -230,17 +434,7 @@ C.init = function(){
     filtres de l'interface.
 */
 C.handler_clickOnFilter = function(ev){
-    // ajoutez vos instruction ici (voir la question 2)
-
-    /* indications 
-       Ici, on va commencer par identifier le filtre sélectionné (any ? light ? dark ?). On sait que cette information
-       correspond à la propriété data-filter de l'élément cliqué (la cible de l'événement donc). Au besoin, consultez
-       la doc (https://developer.mozilla.org/fr/docs/Web/API/HTMLOrForeignElement/dataset) pour vous rappeler comment
-       accéder aux propriétés data-* définies sur un élément HTML.
-       Une fois le filtre identifiez, on peut récupérer les personnages correspondant à l'aide de la méthode M.filterCharacters
-       qui vous est déjà donné dans le Modèle. Mais regardez bien son code pour comprendre comment elle fonctionne.
-       Lorsque vous avez obtenu les bons personnages, il ne reste plus qu'à mettre à jour l'affichage via la Vue.
-    */
+    // Ajoutez vos instructions ici (pensez à vérifiez que les 'click' on bien pour cible un élément <i> ou avec une propriété data-filter)
 }
 
 // Initialisation de l'application. Tout découle de cet appel.
